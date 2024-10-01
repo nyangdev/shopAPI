@@ -9,7 +9,11 @@ public enum MemberExceptions {
     DUPLICATE("DUPLICATE", 409),
 
     // Bad Request
-    INVALID("INVALID", 400);
+    INVALID("INVALID", 400),
+
+    // 잘못된 인증 정보
+    // 토큰 발행을 위한 사용자의 정보 확인 인증 과정에서 발생하는 문제 처리
+    BAD_CREDENTIALS("BAD_CREDENTIALS", 401);
 
     private MemberTaskException memberTaskException;
 
