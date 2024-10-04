@@ -22,6 +22,12 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     // JWTCheckFilter가 동작하지 않아야하는 경로 설정
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        
+        if(request.getServletPath().startsWith("/api/v1/token/")) {
+            return true;
+        }
+        
+        // 경로 지정 필요
         return false;
     }
 
@@ -29,5 +35,37 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        // JWT Exception 처리
+        log.info("JWT Check Filter doFilter...........");
+        log.info("requestURI: " + request.getRequestURI());
+
+        String headerStr = request.getHeader("Authorization");
+
+        log.info("headerStr: " + headerStr);
+
+        // Access Token이 없는 경우
+        if(headerStr == null || !headerStr.startsWith("Bearer ")) {
+            handleException(response, new Exception("ACCESS TOKEN NOT FOUND"));
+
+            return;
+        }
+
+        String accessToken = headerStr.substring(7);
+
+        try {
+            java.util.Map<String,Object> tokenMap = jwtUtil.validateToken(accessToken);
+
+            log.info("tokenMap: " + tokenMap);
+
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            handleException(response, e);
+        }
+    }
+
+    private void handleException(HttpServletResponse response, Exception e) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json");
+        response.getWriter().println("{\"error\":\"" + e.getMessage() + "\"}");
     }
 }
