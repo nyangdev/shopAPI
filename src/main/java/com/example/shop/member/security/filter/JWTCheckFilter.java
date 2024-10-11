@@ -1,5 +1,6 @@
 package com.example.shop.member.security.filter;
 
+import com.example.shop.member.security.auth.CustomUserPrincipal;
 import com.example.shop.member.security.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,10 +8,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -55,9 +64,29 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         try {
             java.util.Map<String,Object> tokenMap = jwtUtil.validateToken(accessToken);
 
+            // 토큰 검증 결과에 문제가 없을때
             log.info("tokenMap: " + tokenMap);
 
+            String mid = tokenMap.get("mid").toString();
+
+            // 권한 여러 개일때는 ,로 구분해서 처리
+            String[] roles = tokenMap.get("role").toString().split(",");
+
+            // 토큰 검증 결과를 이용해서 Authentication 객체를 생성
+            UsernamePasswordAuthenticationToken authenticationFilter =
+                    new UsernamePasswordAuthenticationToken(
+                            new CustomUserPrincipal(mid),
+                            null,
+                            Arrays.stream(roles)
+                                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                                    .collect(Collectors.toList())
+                    );
+
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authenticationFilter);
+
             filterChain.doFilter(request, response);
+
         } catch (Exception e) {
             handleException(response, e);
         }
