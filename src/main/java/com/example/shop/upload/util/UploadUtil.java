@@ -2,6 +2,7 @@ package com.example.shop.upload.util;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
@@ -63,6 +64,10 @@ public class UploadUtil {
 
                 FileCopyUtils.copy(in, out);
 
+                Thumbnails.of(new File(uploadPath + File.separator + saveFileName))
+                                .size(200, 200)
+                                        .toFile(uploadPath + File.separator + "s_" + saveFileName);
+
                 result.add(saveFileName);
             } catch (Exception e) {
                 log.error(e.getMessage());
@@ -70,4 +75,23 @@ public class UploadUtil {
         }
         return result;
     }
+
+    // 파일 삭제
+    public void deleteFile(String fileName) {
+        File file = new File(uploadPath + File.separator + fileName);
+        File thumbFile = new File(uploadPath + File.separator + "s_" + fileName);
+
+        try {
+            if(file.exists()) {
+                file.delete();
+            }
+
+            if(thumbFile.exists()) {
+                thumbFile.delete();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
 }

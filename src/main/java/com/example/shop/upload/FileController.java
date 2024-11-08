@@ -6,10 +6,7 @@ import com.example.shop.upload.util.UploadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -64,5 +61,14 @@ public class FileController {
         if(files == null || files.length == 0) {
             throw new EmptyFileException("No files to upload");
         }
+    }
+
+    @DeleteMapping("/delete/{fileName}")
+    public ResponseEntity<Void> deleteFile(@PathVariable(name = "fileName") String fileName) {
+        log.info("delete file: " + fileName);
+
+        uploadUtil.deleteFile(fileName);
+
+        return ResponseEntity.ok().build();
     }
 }
