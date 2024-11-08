@@ -80,6 +80,25 @@ public class ProductService {
 
         try {
             // 상품 정보 수정
+            productEntity.changePrice(productDTO.getPrice());
+            productEntity.changeTitle(productDTO.getPname());
+
+            // 기존 이미지들 삭제
+            productEntity.clearImages();
+
+            // 새로운 이미지들 추가
+            java.util.List<String> fileNames = productDTO.getImageList();
+
+            if(fileNames != null && !fileNames.isEmpty()) {
+                fileNames.forEach(productEntity::addImage);
+            }
+
+            productRepository.save(productEntity);
+
+            return new ProductDTO(productEntity);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw ProductExceptions.PRODUCT_NOT_MODIFIED.get();
         }
     }
 }
