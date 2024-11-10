@@ -1,11 +1,16 @@
 package com.example.shop.product.service;
 
+import com.example.shop.product.dto.PageRequestDTO;
 import com.example.shop.product.dto.ProductDTO;
+import com.example.shop.product.dto.ProductListDTO;
 import com.example.shop.product.entity.ProductEntity;
 import com.example.shop.product.exception.ProductExceptions;
 import com.example.shop.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,6 +104,23 @@ public class ProductService {
         } catch (Exception e) {
             log.error(e.getMessage());
             throw ProductExceptions.PRODUCT_NOT_MODIFIED.get();
+        }
+    }
+
+    // 상품 목록
+    public Page<ProductListDTO> getList(PageRequestDTO pageRequestDTO) {
+        log.info("getList..................");
+        log.info(pageRequestDTO);
+
+        try {
+
+            Pageable pageable =
+                    pageRequestDTO.getPageable(Sort.by("pno").descending());
+
+            return productRepository.list(pageable);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw ProductExceptions.PRODUCT_NOT_FETCHED.get();
         }
     }
 }
