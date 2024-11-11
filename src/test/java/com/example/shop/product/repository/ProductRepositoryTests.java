@@ -148,4 +148,29 @@ public class ProductRepositoryTests {
             System.out.println(productDTO);
         });
     }
+    
+    // 페이징 처리 리뷰까지 같이 가져오기
+    @Test
+    public void testListWithReviewCount() {
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("pno").descending());
+
+        Page<ProductListDTO> result = productRepository.listWithReviewCount(pageable);
+
+        result.getContent().forEach(productListDTO -> {
+            System.out.println(productListDTO);
+        });
+    }
+
+    @Transactional
+    @Test
+    public void testListWithAllImagesReviewCount() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("pno").descending());
+
+        Page<ProductDTO> result = productRepository.listWithAllImagesReviewCount(pageable);
+
+        result.getContent().forEach(productDTO -> {
+            System.out.println(productDTO);
+        });
+    }
 }
