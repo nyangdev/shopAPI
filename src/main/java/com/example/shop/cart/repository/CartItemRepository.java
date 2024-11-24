@@ -18,4 +18,9 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, Long> 
             " order by c.itemNo desc "
     )
     Optional<List<CartItemEntity>> getCartItemsOfHolder(@Param("holder") String holder);
+
+    @Query("select c.cart.holder " +
+    " from CartItemEntity c " +
+    " where c.itemNo = :itemNo" )
+    Optional<String> getHolderOfCartItem(@Param("itemNo") Long itemNo);
 }
